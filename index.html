@@ -21,28 +21,28 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
-        .login-box {
+        .box {
             width: 360px;
             padding: 40px;
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
             margin-bottom: 10px;
             color: #333;
         }
 
         .subtitle {
-            text-align: center;
             margin-bottom: 30px;
             color: #777;
         }
 
         .input-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         label {
@@ -85,30 +85,52 @@
             margin-top: 15px;
         }
 
-        .register {
-            text-align: center;
-            margin-top: 20px;
+        #welcomePage {
+            display: none;
         }
 
-        .register button {
-            background: none;
+        .welcome-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-text {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        #userEmail {
+            font-weight: bold;
             color: #667eea;
-            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
         }
     </style>
 </head>
 
 <body>
 
-<div class="login-box">
+<!-- HALAMAN LOGIN -->
+<div class="box" id="loginPage">
 
     <h1>Login</h1>
-    <p class="subtitle">Silakan masuk ke akun Anda</p>
+
+    <p class="subtitle">
+        Silakan masuk ke akun Anda
+    </p>
 
     <form id="loginForm">
 
         <div class="input-group">
             <label>Email</label>
+
             <input
                 type="email"
                 id="email"
@@ -119,6 +141,7 @@
 
         <div class="input-group">
             <label>Password</label>
+
             <input
                 type="password"
                 id="password"
@@ -127,7 +150,9 @@
             >
         </div>
 
-        <button type="submit">Login</button>
+        <button type="submit">
+            Login
+        </button>
 
         <div id="message"></div>
 
@@ -135,14 +160,44 @@
 
 </div>
 
-<!-- Supabase -->
+
+<!-- HALAMAN SELAMAT DATANG -->
+<div class="box" id="welcomePage">
+
+    <div class="welcome-icon">
+        👋
+    </div>
+
+    <h1>
+        Selamat Datang!
+    </h1>
+
+    <p class="welcome-text">
+        Kamu berhasil login ke sistem.
+    </p>
+
+    <p id="userEmail"></p>
+
+    <button
+        class="logout-btn"
+        id="logoutButton">
+        Logout
+    </button>
+
+</div>
+
+
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-    // MASUKKAN DATA SUPABASE KAMU DI SINI
-    const SUPABASE_URL = "https://kmzpxvhqgbzmvepescsq.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mWiJNmTUuOSoOGVrt_UpfQ_V3-i-2CG";
+    // DATA SUPABASE
+    const SUPABASE_URL =
+        "https://kmzpxvhqgbzmvepescsq.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_mWiJNmTUuOSoOGVrt_UpfQ_V3-i-2CG";
 
     const { createClient } = supabase;
 
@@ -151,31 +206,125 @@
         SUPABASE_KEY
     );
 
-    document.getElementById("loginForm").addEventListener("submit", async function(event) {
 
-        event.preventDefault();
+    // ELEMENT HALAMAN
+    const loginPage =
+        document.getElementById("loginPage");
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const message = document.getElementById("message");
+    const welcomePage =
+        document.getElementById("welcomePage");
 
-        message.textContent = "Sedang login...";
+    const loginForm =
+        document.getElementById("loginForm");
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+    const message =
+        document.getElementById("message");
 
-        if (error) {
-            message.textContent = "Login gagal: " + error.message;
-            return;
+    const userEmail =
+        document.getElementById("userEmail");
+
+    const logoutButton =
+        document.getElementById("logoutButton");
+
+
+    // FUNGSI MENAMPILKAN HALAMAN WELCOME
+    function showWelcome(user) {
+
+        loginPage.style.display = "none";
+        welcomePage.style.display = "block";
+
+        userEmail.textContent =
+            user.email;
+    }
+
+
+    // FUNGSI MENAMPILKAN LOGIN
+    function showLogin() {
+
+        loginPage.style.display = "block";
+        welcomePage.style.display = "none";
+    }
+
+
+    // PROSES LOGIN
+    loginForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const email =
+                document.getElementById("email").value;
+
+            const password =
+                document.getElementById("password").value;
+
+            message.textContent =
+                "Sedang login...";
+
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+
+                    email: email,
+                    password: password
+
+                });
+
+
+            if (error) {
+
+                message.textContent =
+                    "Login gagal: " + error.message;
+
+                return;
+            }
+
+
+            // LOGIN BERHASIL
+            message.textContent = "";
+
+            showWelcome(data.user);
+
         }
+    );
 
-        message.textContent = "Login berhasil!";
 
-        console.log("User:", data.user);
+    // PROSES LOGOUT
+    logoutButton.addEventListener(
+        "click",
+        async function() {
 
-    });
+            await supabaseClient.auth.signOut();
+
+            showLogin();
+
+        }
+    );
+
+
+    // CEK SESSION SAAT HALAMAN DIBUKA
+    async function checkSession() {
+
+        const { data } =
+            await supabaseClient.auth.getSession();
+
+        if (data.session) {
+
+            showWelcome(
+                data.session.user
+            );
+
+        } else {
+
+            showLogin();
+
+        }
+    }
+
+
+    // JALANKAN CEK SESSION
+    checkSession();
 
 </script>
 
