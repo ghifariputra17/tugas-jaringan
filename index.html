@@ -2,10 +2,182 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Tugas Jaringan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tugas Jaringan</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .login-box {
+            width: 360px;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #777;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5568d8;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .register button {
+            background: none;
+            color: #667eea;
+            padding: 5px;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Halo, ini website tugas saya!</h1>
-    <p>GitHub dan Vercel berhasil terhubung.</p>
+
+<div class="login-box">
+
+    <h1>Login</h1>
+    <p class="subtitle">Silakan masuk ke akun Anda</p>
+
+    <form id="loginForm">
+
+        <div class="input-group">
+            <label>Email</label>
+            <input
+                type="email"
+                id="email"
+                placeholder="Masukkan email"
+                required
+            >
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="Masukkan password"
+                required
+            >
+        </div>
+
+        <button type="submit">Login</button>
+
+        <div id="message"></div>
+
+    </form>
+
+</div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+    // MASUKKAN DATA SUPABASE KAMU DI SINI
+    const SUPABASE_URL = "https://kmzpxvhqgbzmvepescsq.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mWiJNmTUuOSoOGVrt_UpfQ_V3-i-2CG";
+
+    const { createClient } = supabase;
+
+    const supabaseClient = createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const message = document.getElementById("message");
+
+        message.textContent = "Sedang login...";
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            message.textContent = "Login gagal: " + error.message;
+            return;
+        }
+
+        message.textContent = "Login berhasil!";
+
+        console.log("User:", data.user);
+
+    });
+
+</script>
+
 </body>
 </html>
